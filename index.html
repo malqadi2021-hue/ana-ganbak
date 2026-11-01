@@ -606,7 +606,7 @@ footer svg{height:38px;width:auto}
     var halfH = Math.tan(THREE.MathUtils.degToRad(17.5))*camera.position.z, halfW = halfH*camera.aspect;
     layout.mobile = W < 980;
     if(layout.mobile){ layout.x = 0; layout.y = halfH*.42; layout.s = Math.min(.62, (halfW*1.8)/8.2); }
-    else { layout.x = -halfW*.5; layout.y = -.1; layout.s = Math.min(1, (halfW*.92)/8.6); }
+    else { layout.x = -halfW*.56; layout.y = -.1; layout.s = Math.min(.9, (halfW*.74)/8.6); }
   }
   window.addEventListener("resize", resize); resize();
 
