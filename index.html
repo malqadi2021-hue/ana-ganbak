@@ -501,10 +501,12 @@ footer .logo-img{height:42px;width:auto}
     img.onload = function(){
       var c = tc.getContext("2d"); c.imageSmoothingQuality = "high";
       c.drawImage(img, 69, 24, 458, 169, 0, 0, tc.width, tc.height);
+      c.clearRect(418,53,63,83);c.clearRect(862,53,63,83);c.clearRect(308,288,63,83);c.clearRect(555,288,63,83);
       var d = c.getImageData(0,0,tc.width,tc.height), px = d.data;
       var nr=16, ng=37, nb=68;
       for(var i=0;i<px.length;i+=4){
         if(px[i+3]===0) continue;
+        if(px[i]>150 && px[i+2]<130 && px[i]-px[i+2]>70){ px[i+3]=0; continue; }
         var dr=px[i]-nr, dg=px[i+1]-ng, db=px[i+2]-nb;
         var al = Math.min(1, Math.sqrt(dr*dr+dg*dg+db*db)/170);
         if(al < .12){ px[i+3]=0; continue; }
@@ -517,6 +519,22 @@ footer .logo-img{height:42px;width:auto}
     };
     var el = document.querySelector(".logo-img"); if(el) img.src = el.src;
   })();
+
+  // small pins (letter dots) that fly in and lock onto the word
+  var dotPins = [];
+  var DOTS = [[-0.217, 0.473], [1.853, 0.473], [-0.729, -0.62], [0.419, -0.62]];
+  var dotWhite = new THREE.MeshBasicMaterial({color:0xffffff});
+  DOTS.forEach(function(p, i){
+    var g = new THREE.Group();
+    var m = new THREE.Mesh(extrude(pinShape(.19),.1,.02), matOrange); g.add(m);
+    var disc = new THREE.Mesh(new THREE.CircleGeometry(.19*.3,24), dotWhite); disc.position.set(0,.19*.3,.03); g.add(disc);
+    var home = new THREE.Vector3(p[0], p[1]-.19*.3, .44);
+    var ang = i*1.7 + .6;
+    var from = new THREE.Vector3(Math.cos(ang)*9, Math.sin(ang)*6 + 2, 6 + i*1.5);
+    g.position.copy(from); g.scale.setScalar(0);
+    g.userData = {home:home, from:from, delay:2.25 + i*.2, spin:(i%2?1:-1)*Math.PI*3};
+    capsuleG.add(g); dotPins.push(g);
+  });
 
   var pinG = new THREE.Group(); logo.add(pinG);
   var pinMesh = new THREE.Mesh(extrude(pinShape(1.05),.55,.08), matOrange); pinG.add(pinMesh);
@@ -650,6 +668,16 @@ footer .logo-img{height:42px;width:auto}
     lockFlash *= Math.pow(.02, dt);
     rim.intensity = 1.4 + lockFlash*5;
     pinG.scale.setScalar(1 + lockFlash*.18);
+    dotPins.forEach(function(g){
+      var u = g.userData, q = reduce ? 1 : clamp01((t-u.delay)/1.1);
+      var e = easeOutBack(q);
+      g.position.lerpVectors(u.from, u.home, Math.min(1,e));
+      if(e>1){ g.position.y = u.home.y + (e-1)*.6; }
+      g.rotation.y = (1-q)*u.spin;
+      g.rotation.z = (1-q)*u.spin*.3;
+      var land = (q>=1) ? Math.max(0, 1-(t-u.delay-1.1)*4) : 0;
+      g.scale.setScalar(q<=0 ? 0 : (Math.min(1, q*1.6) + land*.35));
+    });
 
     // idle motion
     var idle = reduce ? 0 : 1;
