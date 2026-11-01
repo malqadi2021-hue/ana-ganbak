@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أنا جنبك</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Single dark-navy world taken from the logo; 3D stage lives on the left, copy on the right (RTL start). */
+  --bg:#0A1630;
+  --surface:#11234A;
+  --surface-2:#172E5C;
+  --line:rgba(160,184,230,.16);
+  --ink:#EEF2FA;
+  --muted:#A9B7D2;
+  --orange:#F26B1D;
+  --orange-soft:#FFB07A;
+  --navy:#13294B;
+  --ok:#3FCB8E;
+  --warn:#FFB547;
+  --font-display:"Cairo", "Segoe UI", Tahoma, sans-serif;
+  --font-body:"IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.75;overflow-x:hidden}
+h1,h2,h3{font-family:var(--font-display);line-height:1.25;margin:0;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--orange);outline-offset:3px;border-radius:8px}
+
+#stage{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+.glow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(60% 50% at 25% 40%, rgba(242,107,29,.10), transparent 70%),
+             radial-gradient(50% 60% at 80% 10%, rgba(80,130,230,.12), transparent 70%)}
+main,header,footer{position:relative;z-index:1}
+
+/* Nav */
+.nav{position:fixed;top:0;inset-inline:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px clamp(16px,4vw,48px);background:rgba(10,22,48,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav .brand{display:flex;align-items:center;text-decoration:none}
+.nav .brand svg{height:42px;width:auto;display:block}
+.nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-weight:500;font-size:15px}
+.nav ul a{text-decoration:none;color:var(--muted)}
+.nav ul a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;border:0;cursor:pointer;
+  font-family:var(--font-display);font-weight:800;font-size:16px;text-decoration:none;transition:transform .2s, box-shadow .2s, background .2s}
+.btn-primary{background:var(--orange);color:#fff;box-shadow:0 10px 30px -10px rgba(242,107,29,.7)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px -12px rgba(242,107,29,.85)}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--line)}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+
+/* Layout */
+.wrap{width:min(1240px,100% - 2*clamp(16px,4vw,48px));margin-inline:auto}
+section{padding:clamp(72px,10vw,130px) 0}
+.split .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px}
+.split .copy{grid-column:1}
+.solid{background:linear-gradient(180deg, rgba(10,22,48,.0), rgba(10,22,48,.94) 12%, rgba(10,22,48,.94) 88%, rgba(10,22,48,0))}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:800;font-size:14px;color:var(--orange-soft);
+  background:rgba(242,107,29,.12);border:1px solid rgba(242,107,29,.3);padding:4px 14px;border-radius:999px;margin-bottom:18px}
+.eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--orange)}
+.h2{font-size:clamp(30px,4vw,48px);font-weight:900;margin-bottom:16px}
+.lead{color:var(--muted);font-size:clamp(17px,1.6vw,20px);max-width:60ch}
+
+/* Hero */
+.hero{min-height:min(860px,100vh);display:flex;align-items:center;padding-top:120px}
+.hero h1{font-size:clamp(40px,6.2vw,80px);font-weight:900;letter-spacing:-.5px;margin-bottom:22px}
+.hero h1 .accent{color:var(--orange)}
+.hero .lead{margin-bottom:34px}
+.hero .actions{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:34px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;list-style:none;padding:0;margin:0}
+.chips li{font-size:14px;font-weight:500;color:var(--ink);padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.scroll-hint{display:inline-flex;align-items:center;gap:10px;margin-top:40px;color:var(--muted);font-size:14px}
+.scroll-hint span{width:22px;height:36px;border:2px solid var(--muted);border-radius:12px;position:relative}
+.scroll-hint span::after{content:"";position:absolute;top:6px;left:50%;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:var(--orange);animation:wheel 1.8s infinite}
+@keyframes wheel{0%{transform:translateY(0);opacity:1}70%{transform:translateY(12px);opacity:0}100%{opacity:0}}
+
+/* Features */
+.features-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:40px}
+.feat{display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;align-items:start;padding:20px;border-radius:20px;
+  background:rgba(17,35,74,.78);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .25s, border-color .25s}
+.feat:hover{transform:translateY(-4px);border-color:rgba(242,107,29,.5)}
+.ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#1d3a70,#13294B);border:1px solid rgba(255,255,255,.08)}
+.ico svg{width:26px;height:26px;stroke:var(--orange-soft);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.feat h3{font-size:19px;font-weight:800;margin-bottom:4px}
+.feat p{color:var(--muted);font-size:15px;line-height:1.7}
+
+/* Control dashboard mock */
+.control .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:56px;align-items:center}
+.bullets{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:14px}
+.bullets li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;color:var(--ink)}
+.bullets li svg{width:24px;height:24px;stroke:var(--ok);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;margin-top:4px}
+.bullets b{font-family:var(--font-display)}
+.dash{border-radius:26px;background:#F4F6FB;color:#13294B;padding:18px;box-shadow:0 40px 80px -30px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08);transform:perspective(1400px) rotateY(10deg) rotateX(4deg);transition:transform .6s}
+.dash:hover{transform:perspective(1400px) rotateY(0) rotateX(0)}
+.dash-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.dash-top b{font-family:var(--font-display);font-size:18px}
+.pill{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:#E3E9F5;color:#2B4472}
+.pill.live{background:#DDF6EA;color:#11744A}
+.dash-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:12px}
+.card{background:#fff;border-radius:16px;padding:14px;border:1px solid #E3E8F2}
+.card h4{margin:0 0 10px;font-family:var(--font-display);font-size:14px;color:#4A5D82;font-weight:800}
+.stock-row{display:grid;grid-template-columns:minmax(0,1fr) 70px 38px;align-items:center;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px dashed #E6EBF4}
+.stock-row:last-child{border-bottom:0}
+.bar{height:7px;border-radius:4px;background:#E7ECF5;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px;background:#2F6FDB}
+.bar.low i{background:var(--orange)}
+.qty{font-variant-numeric:tabular-nums;text-align:left;color:#4A5D82;font-weight:600}
+.cam{position:relative;border-radius:12px;overflow:hidden;background:#1B2A45;aspect-ratio:4/3}
+.cam canvas{width:100%;height:100%;display:block}
+.cam .rec{position:absolute;top:8px;inset-inline-start:8px;display:flex;align-items:center;gap:6px;font-size:11px;color:#fff;background:rgba(0,0,0,.45);padding:2px 8px;border-radius:999px}
+.cam .rec::before{content:"";width:7px;height:7px;border-radius:50%;background:#FF4D4D;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.2}}
+.alert{display:flex;gap:10px;align-items:flex-start;background:#FFF3EA;border:1px solid #FFD2B3;border-radius:12px;padding:10px;font-size:13px;margin-top:10px;color:#7A3410}
+.alert svg{flex:none;width:18px;height:18px;stroke:var(--orange);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.kpi{background:#fff;border:1px solid #E3E8F2;border-radius:14px;padding:10px 12px}
+.kpi small{display:block;color:#6A7B9C;font-size:12px}
+.kpi strong{font-family:var(--font-display);font-size:16px;font-variant-numeric:tabular-nums}
+
+/* AI */
+.ai .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:56px;align-items:center}
+.chat{border-radius:26px;background:var(--surface);border:1px solid var(--line);padding:22px;display:grid;gap:14px;box-shadow:0 30px 70px -30px rgba(0,0,0,.7)}
+.chat-head{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.chat-head .av{width:40px;height:40px;border-radius:12px;background:var(--orange);display:grid;place-items:center}
+.chat-head .av svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chat-head b{font-family:var(--font-display);display:block}
+.chat-head small{color:var(--muted)}
+.msg{max-width:88%;padding:12px 16px;border-radius:18px;font-size:15px;line-height:1.7}
+.msg.me{justify-self:start;background:var(--orange);color:#fff;border-end-start-radius:6px}
+.msg.bot{justify-self:end;background:var(--surface-2);border-end-end-radius:6px}
+.msg.bot ul{margin:8px 0;padding-inline-start:18px}
+.msg.bot .act{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.msg.bot .act span{font-size:13px;padding:4px 12px;border-radius:999px;border:1px solid rgba(255,176,122,.5);color:var(--orange-soft)}
+.example{font-size:12px;color:var(--muted);text-align:center}
+
+/* Marketplace */
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:34px 0 26px}
+.node{padding:18px;border-radius:18px;background:rgba(17,35,74,.8);border:1px solid var(--line);text-align:center;backdrop-filter:blur(10px)}
+.node.mid{background:var(--orange);border-color:var(--orange);color:#fff}
+.node b{font-family:var(--font-display);font-size:18px;display:block}
+.node small{color:var(--muted);font-size:13px}
+.node.mid small{color:#FFE6D6}
+.mk-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mk{padding:18px;border-radius:18px;background:rgba(17,35,74,.78);border:1px solid var(--line);backdrop-filter:blur(10px)}
+.mk h3{font-size:17px;font-weight:800;margin-bottom:4px}
+.mk p{color:var(--muted);font-size:14.5px}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:44px;counter-reset:s}
+.step{padding:28px;border-radius:22px;background:var(--surface);border:1px solid var(--line);position:relative}
+.step::before{counter-increment:s;content:counter(s, arabic-indic);font-family:var(--font-display);font-weight:900;font-size:44px;color:var(--orange);line-height:1;display:block;margin-bottom:14px}
+.step h3{font-size:20px;font-weight:800;margin-bottom:6px}
+.step p{color:var(--muted);font-size:15px}
+.who{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+.who span{padding:8px 18px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-weight:500}
+
+/* CTA */
+.form{display:grid;gap:14px;padding:28px;border-radius:26px;background:rgba(17,35,74,.88);border:1px solid var(--line);backdrop-filter:blur(12px);margin-top:30px}
+.form .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.form label{display:grid;gap:6px;font-size:14px;font-weight:600;color:var(--muted)}
+.form input,.form select{font:inherit;color:var(--ink);background:#0C1B3B;border:1px solid var(--line);border-radius:14px;min-height:50px;padding:0 16px}
+.form input:focus,.form select:focus{border-color:var(--orange);outline:none}
+.form .note{font-size:14px;color:var(--orange-soft);min-height:1.5em}
+
+footer{padding:40px 0 50px;border-top:1px solid var(--line);background:var(--bg)}
+footer .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;color:var(--muted);font-size:14px}
+footer svg{height:38px;width:auto}
+
+/* Reveal: visible at rest, only slides */
+.rv{transform:translateY(26px);transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.in{transform:none}
+
+@media (max-width:980px){
+  .nav ul{display:none}
+  .split .wrap,.control .wrap,.ai .wrap{grid-template-columns:minmax(0,1fr)}
+  .hero{padding-top:min(52vh,420px);align-items:flex-start}
+  section:not(.hero){background:rgba(10,22,48,.9)}
+  .dash{transform:none}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .features-grid,.mk-list,.steps,.flow,.form .row{grid-template-columns:minmax(0,1fr)}
+  .dash-grid,.kpis{grid-template-columns:minmax(0,1fr)}
+  .nav .btn{padding:0 16px;font-size:14px;min-height:44px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rv{transform:none;transition:none}
+  .scroll-hint span::after,.cam .rec::before{animation:none}
+  .dash{transform:none}
+}
+</style>
+</head>
+<body>
+<canvas id="stage" aria-hidden="true"></canvas>
+<div class="glow"></div>
+
+<header class="nav">
+  <a class="brand" href="#top" aria-label="أنا جنبك — الرئيسية">
+    <svg viewBox="0 0 250 92" role="img" aria-label="أنا جنبك">
+      <path d="M38 8 H170 A32 32 0 0 1 170 72 H98 L84 88 L76 72 H38 A32 32 0 0 1 38 8 Z" fill="#13294B" stroke="#2C4A82" stroke-width="2"></path>
+      <text x="104" y="52" text-anchor="middle" font-family="Cairo, sans-serif" font-weight="800" font-size="34" fill="#FFFFFF" direction="rtl">أنا جنبك</text>
+      <path d="M214 84 C214 84 190 58 190 42 A24 24 0 0 1 238 42 C238 58 214 84 214 84 Z" fill="#F26B1D" stroke="#0A1630" stroke-width="5"></path>
+      <circle cx="214" cy="42" r="8" fill="#FFFFFF"></circle>
+    </svg>
+  </a>
+  <ul>
+    <li><a href="#features">المميزات</a></li>
+    <li><a href="#control">التحكم</a></li>
+    <li><a href="#ai">المساعد الذكي</a></li>
+    <li><a href="#market">الماركت بليس</a></li>
+    <li><a href="#how">إزاي تبدأ</a></li>
+  </ul>
+  <a class="btn btn-primary" href="#cta">اطلب نسخة تجريبية</a>
+</header>
+
+<main id="top">
+  <section class="hero split" data-scene="logo">
+    <div class="wrap">
+      <div class="copy">
+        <span class="eyebrow">منصة تشغيل السوبر ماركت في مصر</span>
+        <h1>محلك كله في إيدك،<br><span class="accent">وإحنا جنبك</span> في كل خطوة</h1>
+        <p class="lead">أنا جنبك بيديك تحكم كامل في السوبر ماركت بتاعك: المخزون، المشتريات، الحسابات، والكاميرات، وبيوصلك بأكتر من مورد جملة وبعملاء منطقتك من شاشة واحدة.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#cta">اطلب نسخة تجريبية</a>
+          <a class="btn btn-ghost" href="#features">شوف المميزات</a>
+        </div>
+        <ul class="chips">
+          <li>مخزون لحظة بلحظة</li>
+          <li>كاميرات المحل من موبايلك</li>
+          <li>مساعد ذكي</li>
+          <li>موردين أكتر وأسعار أحسن</li>
+        </ul>
+        <div class="scroll-hint"><span></span>انزل تحت وشوف</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="split" data-scene="shelf">
+    <div class="wrap">
+      <div class="copy">
+        <span class="eyebrow">المميزات</span>
+        <h2 class="h2">كل اللي محتاجه تدير بيه محلك</h2>
+        <p class="lead">من أول ما البضاعة تدخل المخزن لحد ما تخرج من الكاشير، كل حركة متسجلة وقدامك.</p>
+        <div class="features-grid">
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg></div><div><h3>متابعة المخزون</h3><p>رصيد كل صنف لحظة بلحظة، في كل فرع وكل مخزن.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M15 10l5-3v10l-5-3"></path><rect x="3" y="6" width="12" height="12" rx="2"></rect></svg></div><div><h3>كاميرات المحل</h3><p>شيك على الرفوف والمخزن بالكاميرا في أي وقت ومن أي مكان.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg></div><div><h3>تنبيه قبل النفاد</h3><p>رسالة بتوصلك قبل ما الصنف يخلص، مش بعد ما الزبون يسأل عليه.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M2 3h3l2.6 12.4a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"></path></svg></div><div><h3>حركات الشراء والبيع</h3><p>تابع كل فاتورة شراء وكل عملية بيع، ومين عملها وإمتى.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M7 7l-4 7a4 4 0 0 0 8 0zM17 7l-4 7a4 4 0 0 0 8 0z"></path></svg></div><div><h3>مطابقات مالية</h3><p>الدرج مع المبيعات، والمورد مع الفواتير، وكل فرق بيبان على طول.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"></path><path d="M9 7h6M9 11h6M9 15h4"></path></svg></div><div><h3>الفواتير</h3><p>فواتير بيع وشراء منظمة ومحفوظة، تطلعها وتراجعها بضغطة.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 3v2h6V3M9 11l2 2 4-4M9 17h6"></path></svg></div><div><h3>الجرد والحصر</h3><p>جرد بالباركود من الموبايل، والفرق بين الدفتري والفعلي قدامك.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"></path></svg></div><div><h3>المساعد الذكي</h3><p>اسأله بالعامية: إيه اللي هيخلص؟ مين أرخص مورد؟ وهو يرد ويجهزلك الطلب.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><circle cx="4" cy="5" r="2"></circle><circle cx="20" cy="5" r="2"></circle><circle cx="4" cy="19" r="2"></circle><circle cx="20" cy="19" r="2"></circle><path d="M6 6l4 4M18 6l-4 4M6 18l4-4M18 18l-4-4"></path></svg></div><div><h3>ماركت بليس الموردين</h3><p>اطلب بضاعتك من أكتر من مورد جملة، وقارن الأسعار قبل ما تشتري.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path><path d="M9 12l2 2 4-4"></path></svg></div><div><h3>صلاحيات وتحكم</h3><p>المالك يشوف كل حاجة، والمدير والكاشير كل واحد يشوف اللي يخصه بس.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0 1 4.2-2.6M10.7 5.1A15 15 0 0 1 22 8.8M5 12.5a10 10 0 0 1 5.2-2.6M16.8 11.1a10 10 0 0 1 2.2 1.4M8.5 16.1a5 5 0 0 1 7 0M12 20h.01M3 3l18 18"></path></svg></div><div><h3>كاشير بيشتغل من غير نت</h3><p>النت فصل؟ البيع مكمل عادي، وكله بيتزامن أول ما يرجع.</p></div></article>
+          <article class="feat rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="M7 15l4-4 3 3 5-6"></path></svg></div><div><h3>تقارير وتحليلات</h3><p>أكتر الأصناف مبيعًا، هامش الربح، وأوقات الذروة في محلك.</p></div></article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="control" class="control solid" data-scene="shelf">
+    <div class="wrap">
+      <div class="rv">
+        <span class="eyebrow">تحكم كامل</span>
+        <h2 class="h2">شوف محلك من موبايلك، وأنت في أي مكان</h2>
+        <p class="lead">لوحة واحدة فيها المخزون والكاميرات والتنبيهات والأرقام المهمة، للمحل الواحد أو للسلسلة كلها.</p>
+        <ul class="bullets">
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg><span><b>كل الفروع في مكان واحد:</b> قارن المبيعات والمخزون بين فروعك.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg><span><b>الكاميرا جنب الرقم:</b> الرصيد بيقول ١٢ كرتونة؟ افتح كاميرا المخزن واتأكد بعينك.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg><span><b>تنبيهات على الموبايل:</b> نفاد صنف، فرق في الدرج، أو فاتورة مورد مستنية مراجعة.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg><span><b>تحكم في اللي تحت منك:</b> صلاحيات لكل موظف، وسجل بكل حركة عملها.</span></li>
+        </ul>
+      </div>
+      <div class="dash rv" role="img" aria-label="شكل توضيحي للوحة التحكم">
+        <div class="dash-top"><b>فرع المعادي</b><span class="pill live">متصل الآن</span></div>
+        <div class="dash-grid">
+          <div class="card">
+            <h4>المخزون</h4>
+            <div class="stock-row"><span>زيت عباد الشمس ١ لتر</span><span class="bar low"><i style="width:14%"></i></span><span class="qty">٦</span></div>
+            <div class="stock-row"><span>أرز مصري ١ كجم</span><span class="bar"><i style="width:72%"></i></span><span class="qty">١٤٤</span></div>
+            <div class="stock-row"><span>سكر ١ كجم</span><span class="bar low"><i style="width:20%"></i></span><span class="qty">١٢</span></div>
+            <div class="stock-row"><span>شاي ٢٥٠ جم</span><span class="bar"><i style="width:58%"></i></span><span class="qty">٨٧</span></div>
+            <div class="stock-row"><span>مكرونة ٤٠٠ جم</span><span class="bar"><i style="width:84%"></i></span><span class="qty">٢١٠</span></div>
+          </div>
+          <div class="card">
+            <h4>كاميرا المخزن</h4>
+            <div class="cam"><canvas id="camfeed" width="320" height="240"></canvas><span class="rec">مباشر</span></div>
+            <div class="alert"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg><span>الزيت هيخلص خلال يومين. عندك ٣ موردين متاحين.</span></div>
+          </div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><small>مبيعات النهارده</small><strong>[المبلغ]</strong></div>
+          <div class="kpi"><small>فواتير شراء</small><strong>[العدد]</strong></div>
+          <div class="kpi"><small>أصناف قربت تخلص</small><strong>٢</strong></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ai" class="ai solid" data-scene="logo">
+    <div class="wrap">
+      <div class="chat rv" role="img" aria-label="مثال لمحادثة مع المساعد الذكي">
+        <div class="chat-head"><div class="av"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg></div><div><b>مساعد أنا جنبك</b><small>بيرد بالعامية المصرية</small></div></div>
+        <div class="msg me">إيه الأصناف اللي هتخلص الأسبوع ده؟</div>
+        <div class="msg bot">على حسب بيعك آخر ٣٠ يوم، دول هيخلصوا قبل الخميس:
+          <ul><li>زيت عباد الشمس ١ لتر</li><li>سكر ١ كجم</li><li>جبنة بيضا ٥٠٠ جم</li></ul>
+          أجهزلك طلب من أرخص مورد متاح؟
+          <div class="act"><span>جهّز الطلب</span><span>قارن الموردين</span></div>
+        </div>
+        <div class="msg me">قارن الموردين في السكر</div>
+        <p class="example">مثال توضيحي</p>
+      </div>
+      <div class="rv">
+        <span class="eyebrow">المساعد الذكي</span>
+        <h2 class="h2">مساعد معاك في المحل ٢٤ ساعة</h2>
+        <p class="lead">بدل ما تدور في التقارير، اسأل. المساعد بيقرا مخزونك ومبيعاتك وأسعار الموردين، ويرد عليك بكلام واضح وخطوة تعملها.</p>
+        <ul class="bullets">
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg><span>يتوقع الأصناف اللي هتخلص ويقترح الكمية المناسبة.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg><span>يقارن أسعار الموردين ويجهز طلب الشراء.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg><span>يلخصلك يومك: المبيعات، الفروقات، والحاجات المستنية قرارك.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="market" class="split" data-scene="net">
+    <div class="wrap">
+      <div class="copy">
+        <span class="eyebrow">الماركت بليس</span>
+        <h2 class="h2">المورد والمحل والزبون على شبكة واحدة</h2>
+        <p class="lead">كتالوج موحد لكل منتجات السوبر ماركت في مصر، بيربطك بموردين الجملة من ناحية، وبعملاء منطقتك من الناحية التانية.</p>
+        <div class="flow rv">
+          <div class="node"><b>موردين الجملة</b><small>عروض وأسعار</small></div>
+          <div class="node mid"><b>محلك</b><small>على أنا جنبك</small></div>
+          <div class="node"><b>عملاء الحتة</b><small>طلبات أونلاين</small></div>
+        </div>
+        <div class="mk-list">
+          <div class="mk rv"><h3>قارن أكتر من مورد</h3><p>نفس الصنف بنفس الباركود، وأسعار كل الموردين جنب بعض.</p></div>
+          <div class="mk rv"><h3>اطلب بضاعتك بضغطة</h3><p>الطلب بيروح للمورد، والفاتورة بتدخل المخزون لوحدها لما البضاعة توصل.</p></div>
+          <div class="mk rv"><h3>محلك أونلاين</h3><p>عملاء منطقتك يطلبوا من محلك من الموبايل، ومن نفس المخزون.</p></div>
+          <div class="mk rv"><h3>كتالوج جاهز</h3><p>مش هتكتب أصنافك من الأول. امسح الباركود والصنف ينزل بصورته وبياناته.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="solid" data-scene="logo">
+    <div class="wrap">
+      <span class="eyebrow">إزاي تبدأ</span>
+      <h2 class="h2">ثلاث خطوات وتبدأ تشتغل</h2>
+      <div class="steps">
+        <div class="step rv"><h3>سجّل محلك</h3><p>بيانات المحل والفروع والموظفين وصلاحيات كل واحد.</p></div>
+        <div class="step rv"><h3>دخّل أصنافك من الكتالوج</h3><p>امسح الباركود، والصنف ينزل جاهز. حط سعرك ورصيدك وخلاص.</p></div>
+        <div class="step rv"><h3>ابدأ بيع وتابع</h3><p>الكاشير شغال، والتنبيهات والتقارير والمساعد معاك من أول يوم.</p></div>
+      </div>
+      <div class="who">
+        <span>سوبر ماركت</span><span>ميني ماركت</span><span>سلاسل وفروع</span><span>بقالة</span><span>موردين جملة</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="cta" class="split" data-scene="logo">
+    <div class="wrap">
+      <div class="copy">
+        <span class="eyebrow">ابدأ دلوقتي</span>
+        <h2 class="h2">جرّب أنا جنبك في محلك</h2>
+        <p class="lead">سيب بياناتك وفريقنا يتواصل معاك يجهزلك نسخة تجريبية على أصناف محلك.</p>
+        <form class="form" id="lead-form" novalidate>
+          <div class="row">
+            <label for="f-name">الاسم<input id="f-name" name="name" autocomplete="name" required></label>
+            <label for="f-phone">رقم الموبايل<input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required></label>
+          </div>
+          <div class="row">
+            <label for="f-store">اسم المحل<input id="f-store" name="store"></label>
+            <label for="f-size">عدد الفروع<select id="f-size" name="size"><option>فرع واحد</option><option>٢ إلى ٥ فروع</option><option>أكتر من ٥ فروع</option><option>أنا مورد جملة</option></select></label>
+          </div>
+          <button class="btn btn-primary" type="submit">اطلب نسخة تجريبية</button>
+          <p class="note" id="form-note" role="status"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <svg viewBox="0 0 250 92" role="img" aria-label="أنا جنبك">
+      <path d="M38 8 H170 A32 32 0 0 1 170 72 H98 L84 88 L76 72 H38 A32 32 0 0 1 38 8 Z" fill="#13294B" stroke="#2C4A82" stroke-width="2"></path>
+      <text x="104" y="52" text-anchor="middle" font-family="Cairo, sans-serif" font-weight="800" font-size="34" fill="#FFFFFF" direction="rtl">أنا جنبك</text>
+      <path d="M214 84 C214 84 190 58 190 42 A24 24 0 0 1 238 42 C238 58 214 84 214 84 Z" fill="#F26B1D" stroke="#0A1630" stroke-width="5"></path>
+      <circle cx="214" cy="42" r="8" fill="#FFFFFF"></circle>
+    </svg>
+    <span>© ٢٠٢٦ أنا جنبك. كل الحقوق محفوظة.</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Form (not connected yet) ---------- */
+  var form = document.getElementById("lead-form");
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var note = document.getElementById("form-note");
+    var name = document.getElementById("f-name").value.trim();
+    var phone = document.getElementById("f-phone").value.trim();
+    if(!name || !phone){ note.textContent = "اكتب اسمك ورقم موبايلك."; return; }
+    note.textContent = "النموذج ده لسه مش متوصل بفريق المبيعات، وهيتربط قبل الإطلاق.";
+  });
+
+  /* ---------- Reveal (visible at rest, only slides) ---------- */
+  var rv = document.querySelectorAll(".rv");
+  if("IntersectionObserver" in window && !reduce){
+    var io = new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target);} }); }, {threshold:.12});
+    rv.forEach(function(el){ io.observe(el); });
+  } else { rv.forEach(function(el){ el.classList.add("in"); }); }
+
+  /* ---------- Fake camera feed (2D canvas) ---------- */
+  var cam = document.getElementById("camfeed");
+  if(cam){
+    var cx = cam.getContext("2d");
+    var shelfColors = ["#F26B1D","#2F6FDB","#E9C46A","#3FCB8E","#E76F51","#8AB4F8","#F4A261"];
+    var items = [];
+    for(var r=0;r<3;r++){ for(var c=0;c<9;c++){ items.push({r:r,c:c,col:shelfColors[(r*5+c*3)%shelfColors.length],h:22+((r*7+c*13)%14),gone:(r===1&&(c===2||c===3))||(r===2&&c===7)}); } }
+    var drawCam = function(t){
+      cx.fillStyle="#1B2A45"; cx.fillRect(0,0,320,240);
+      for(var r=0;r<3;r++){
+        var y = 70 + r*68;
+        cx.fillStyle="#46597E"; cx.fillRect(10,y,300,7);
+      }
+      items.forEach(function(it){
+        if(it.gone) return;
+        var x = 18 + it.c*32, y = 70 + it.r*68;
+        cx.fillStyle=it.col; cx.fillRect(x,y-it.h,24,it.h);
+        cx.fillStyle="rgba(255,255,255,.25)"; cx.fillRect(x+3,y-it.h+4,18,4);
+      });
+      cx.strokeStyle="#F26B1D"; cx.lineWidth=2; cx.setLineDash([5,4]);
+      cx.strokeRect(78,108,70,34); cx.strokeRect(238,176,40,34); cx.setLineDash([]);
+      var g = (t/40)%240;
+      cx.fillStyle="rgba(255,255,255,.05)"; cx.fillRect(0,g,320,14);
+      cx.fillStyle="rgba(255,255,255,.7)"; cx.font="11px monospace"; cx.fillText("CAM-02  "+new Date().toLocaleTimeString("en-GB"),180,230);
+    };
+    var camLoop = function(t){ drawCam(t||0); if(!reduce) requestAnimationFrame(camLoop); };
+    camLoop(0);
+  }
+
+  /* ---------- Three.js stage ---------- */
+  if(typeof THREE === "undefined") return;
+  var canvas = document.getElementById("stage");
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:true}); } catch(err){ return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(35, 1, .1, 100);
+  camera.position.set(0,0,13);
+
+  scene.add(new THREE.AmbientLight(0x9fb4e0, .55));
+  var key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(-4,6,8); scene.add(key);
+  var rim = new THREE.PointLight(0xF26B1D, 1.4, 30); rim.position.set(5,-2,4); scene.add(rim);
+  var fill = new THREE.PointLight(0x5b8cff, .9, 30); fill.position.set(-7,3,2); scene.add(fill);
+
+  var NAVY = 0x16305A, ORANGE = 0xF26B1D;
+  var matNavy = new THREE.MeshStandardMaterial({color:NAVY, metalness:.25, roughness:.35});
+  var matOrange = new THREE.MeshStandardMaterial({color:ORANGE, metalness:.15, roughness:.38, emissive:0x3a1200});
+  var matWhite = new THREE.MeshStandardMaterial({color:0xffffff, roughness:.5});
+
+  function pinShape(s){
+    var sh = new THREE.Shape();
+    sh.moveTo(0,-1.05*s);
+    sh.quadraticCurveTo(-.7*s,-.25*s,-.7*s,.3*s);
+    sh.absarc(0,.3*s,.7*s,Math.PI,0,true);
+    sh.quadraticCurveTo(.7*s,-.25*s,0,-1.05*s);
+    var hole = new THREE.Path(); hole.absarc(0,.3*s,.27*s,0,Math.PI*2,true); sh.holes.push(hole);
+    return sh;
+  }
+  function extrude(shape, depth, bevel){
+    var g = new THREE.ExtrudeGeometry(shape,{depth:depth,bevelEnabled:true,bevelThickness:bevel,bevelSize:bevel*.8,bevelSegments:4,curveSegments:40});
+    g.translate(0,0,-depth/2); return g;
+  }
+
+  /* ----- Logo group ----- */
+  var logo = new THREE.Group(); scene.add(logo);
+  var capsuleG = new THREE.Group(); logo.add(capsuleG);
+  var w=6, h=2.2, r=1.1;
+  var cap = new THREE.Shape();
+  cap.moveTo(-w/2+r,-h/2);
+  cap.lineTo(-.95,-h/2); cap.lineTo(-.55,-h/2-.62); cap.lineTo(-.15,-h/2);
+  cap.lineTo(w/2-r,-h/2);
+  cap.absarc(w/2-r,0,r,-Math.PI/2,Math.PI/2,false);
+  cap.lineTo(-w/2+r,h/2);
+  cap.absarc(-w/2+r,0,r,Math.PI/2,Math.PI*1.5,false);
+  var capMesh = new THREE.Mesh(extrude(cap,.55,.09), matNavy); capsuleG.add(capMesh);
+
+  var tc = document.createElement("canvas"); tc.width=1024; tc.height=360;
+  var tex = new THREE.CanvasTexture(tc); tex.anisotropy = 4;
+  var txtMat = new THREE.MeshBasicMaterial({map:tex, transparent:true, opacity:0, depthWrite:false});
+  var txt = new THREE.Mesh(new THREE.PlaneGeometry(5.2,1.83), txtMat);
+  txt.position.set(-.1,.02,.38); capsuleG.add(txt);
+  function drawText(){
+    var c = tc.getContext("2d"); c.clearRect(0,0,1024,360);
+    c.fillStyle="#ffffff"; c.textAlign="center"; c.textBaseline="middle"; c.direction="rtl";
+    c.font = "800 230px Cairo, 'Segoe UI', Tahoma, sans-serif";
+    c.fillText("أنا جنبك", 512, 190);
+    tex.needsUpdate = true;
+  }
+  drawText();
+  if(document.fonts && document.fonts.load){ document.fonts.load("800 230px Cairo").then(drawText).catch(function(){}); }
+
+  var pinG = new THREE.Group(); logo.add(pinG);
+  var pinMesh = new THREE.Mesh(extrude(pinShape(1.05),.55,.08), matOrange); pinG.add(pinMesh);
+  var pinHome = new THREE.Vector3(3.55,.12,.25);
+  pinG.position.copy(pinHome);
+
+  // floating props around the logo
+  var props = new THREE.Group(); logo.add(props);
+  var propCols = [0xF26B1D,0x2F6FDB,0xE9C46A,0x3FCB8E,0xFFFFFF,0x8AB4F8];
+  var propList = [];
+  for(var i=0;i<16;i++){
+    var m, kind = i%4;
+    var mat = new THREE.MeshStandardMaterial({color:propCols[i%propCols.length], roughness:.45, metalness:.1});
+    if(kind===0){ m = new THREE.Mesh(new THREE.BoxGeometry(.5,.62,.38), mat); }
+    else if(kind===1){ m = new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.07,32), new THREE.MeshStandardMaterial({color:0xF4B13D, metalness:.6, roughness:.3})); }
+    else if(kind===2){ m = new THREE.Mesh(extrude(pinShape(.32),.14,.03), mat); }
+    else { m = new THREE.Mesh(new THREE.CylinderGeometry(.18,.2,.6,24), mat); }
+    var ang = (i/16)*Math.PI*2, rad = 4.6 + (i%3)*.55;
+    m.userData = {ang:ang, rad:rad, y:(Math.sin(i*1.7))*2.1, spd:.08+(i%5)*.015, rot:new THREE.Vector3(Math.random(),Math.random(),Math.random()).multiplyScalar(.02)};
+    props.add(m); propList.push(m);
+  }
+
+  /* ----- Shelf group (inventory + camera) ----- */
+  var shelf = new THREE.Group(); scene.add(shelf);
+  var shelfMat = new THREE.MeshStandardMaterial({color:0x3A507E, roughness:.6, metalness:.2});
+  var boxes = [];
+  for(var s=0;s<3;s++){
+    var plank = new THREE.Mesh(new THREE.BoxGeometry(6.4,.14,1.4), shelfMat);
+    plank.position.set(0,-1.9+s*1.75,0); shelf.add(plank);
+    for(var b=0;b<7;b++){
+      var low = (s===1&&b===2)||(s===0&&b===5)||(s===2&&b===4);
+      var hh = .7 + ((s*3+b*5)%4)*.14;
+      var bm = new THREE.MeshStandardMaterial({color:low?0xF26B1D:propCols[(s*2+b)%propCols.length], roughness:.4, metalness:.08, emissive:low?0x5a1e00:0x000000});
+      var bx = new THREE.Mesh(new THREE.BoxGeometry(.66,hh,.8), bm);
+      var by = -1.9+s*1.75 + .07 + hh/2;
+      bx.position.set(-2.75+b*.92, by, 0);
+      bx.userData = {baseY:by, low:low, delay:(s*7+b)*.035};
+      if(low){ bx.scale.y = .35; bx.position.y = -1.9+s*1.75+.07+hh*.35/2; bx.userData.baseY = bx.position.y; }
+      shelf.add(bx); boxes.push(bx);
+    }
+  }
+  var poleL = new THREE.Mesh(new THREE.BoxGeometry(.14,5.2,.14), shelfMat); poleL.position.set(-3.25,-.15,-.6); shelf.add(poleL);
+  var poleR = poleL.clone(); poleR.position.x = 3.25; shelf.add(poleR);
+  // CCTV camera scanning the shelf
+  var camG = new THREE.Group(); camG.position.set(2.6,2.9,1.4); shelf.add(camG);
+  var body = new THREE.Mesh(new THREE.BoxGeometry(.9,.42,.42), matWhite); camG.add(body);
+  var lens = new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.2,24), matNavy); lens.rotation.z = Math.PI/2; lens.position.x = -.5; camG.add(lens);
+  var led = new THREE.Mesh(new THREE.SphereGeometry(.05,12,12), new THREE.MeshBasicMaterial({color:0xff4d4d})); led.position.set(.3,.12,.22); camG.add(led);
+  var cone = new THREE.Mesh(new THREE.ConeGeometry(1.5,4.2,32,1,true), new THREE.MeshBasicMaterial({color:0xF26B1D, transparent:true, opacity:.10, side:THREE.DoubleSide, depthWrite:false}));
+  cone.rotation.z = -Math.PI/2; cone.position.x = -2.2; cone.scale.set(.8,.85,.8); camG.add(cone);
+
+  /* ----- Network group (marketplace) ----- */
+  var net = new THREE.Group(); scene.add(net);
+  var hub = new THREE.Mesh(new THREE.SphereGeometry(.75,40,40), matOrange); net.add(hub);
+  var ring = new THREE.Mesh(new THREE.TorusGeometry(1.1,.05,16,80), new THREE.MeshBasicMaterial({color:0xFFB07A})); net.add(ring);
+  var nodes = [], edges = [], pulses = [];
+  var lineMat = new THREE.LineBasicMaterial({color:0x5B7BB8, transparent:true, opacity:.55});
+  function addNode(pos, geo, mat){ var n = new THREE.Mesh(geo, mat); n.position.copy(pos); net.add(n); nodes.push(n);
+    var lg = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), pos.clone()]); var ln = new THREE.Line(lg, lineMat); net.add(ln);
+    edges.push(pos.clone()); return n; }
+  var supMat = new THREE.MeshStandardMaterial({color:0x2F6FDB, roughness:.4});
+  var cusMat = new THREE.MeshStandardMaterial({color:0xE9EEF8, roughness:.5});
+  for(var k=0;k<7;k++){ var a = (k/7)*Math.PI*2; addNode(new THREE.Vector3(Math.cos(a)*3.2, Math.sin(a)*2.4, Math.sin(a*2)*1.2), new THREE.BoxGeometry(.5,.5,.5), supMat); }
+  for(var q=0;q<10;q++){ var a2 = (q/10)*Math.PI*2+.3; addNode(new THREE.Vector3(Math.cos(a2)*1.9, Math.sin(a2)*1.5, -1.2+Math.cos(a2*3)*.8), new THREE.SphereGeometry(.17,20,20), cusMat); }
+  var pulseGeo = new THREE.SphereGeometry(.07,10,10);
+  edges.forEach(function(e, idx){ var p = new THREE.Mesh(pulseGeo, new THREE.MeshBasicMaterial({color: idx<7?0xFFB07A:0xffffff})); p.userData={to:e, t:Math.random(), inward: idx<7}; net.add(p); pulses.push(p); });
+
+  /* ----- Scene states ----- */
+  var groups = {logo:logo, shelf:shelf, net:net};
+  var vis = {logo:1, shelf:0, net:0}, target = {logo:1, shelf:0, net:0};
+  var current = "logo";
+  function setScene(name){ if(!groups[name]) return; current = name; Object.keys(target).forEach(function(k){ target[k] = k===name?1:0; }); }
+  var secs = document.querySelectorAll("[data-scene]");
+  if("IntersectionObserver" in window){
+    var ratios = new Map();
+    var sio = new IntersectionObserver(function(es){
+      es.forEach(function(en){ ratios.set(en.target, en.intersectionRatio); });
+      var best=null, bestR=0; ratios.forEach(function(v,el){ if(v>bestR){bestR=v;best=el;} });
+      if(best) setScene(best.getAttribute("data-scene"));
+    }, {threshold:[0,.15,.3,.45,.6,.75,.9]});
+    secs.forEach(function(el){ sio.observe(el); });
+  }
+
+  /* ----- Layout ----- */
+  var layout = {x:-3.4, y:0, s:1, mobile:false};
+  function resize(){
+    var W = window.innerWidth, H = window.innerHeight;
+    renderer.setSize(W,H,false); camera.aspect = W/H; camera.updateProjectionMatrix();
+    var halfH = Math.tan(THREE.MathUtils.degToRad(17.5))*camera.position.z, halfW = halfH*camera.aspect;
+    layout.mobile = W < 980;
+    if(layout.mobile){ layout.x = 0; layout.y = halfH*.42; layout.s = Math.min(.62, (halfW*1.8)/8.2); }
+    else { layout.x = -halfW*.5; layout.y = -.1; layout.s = Math.min(1, (halfW*.92)/8.6); }
+  }
+  window.addEventListener("resize", resize); resize();
+
+  var mouse = {x:0,y:0};
+  window.addEventListener("pointermove", function(e){ mouse.x = (e.clientX/window.innerWidth-.5)*2; mouse.y = (e.clientY/window.innerHeight-.5)*2; });
+
+  function easeOutBack(x){ var c1=1.70158, c3=c1+1; return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2); }
+  function easeOutBounce(x){ var n1=7.5625,d1=2.75; if(x<1/d1) return n1*x*x; else if(x<2/d1) return n1*(x-=1.5/d1)*x+.75; else if(x<2.5/d1) return n1*(x-=2.25/d1)*x+.9375; return n1*(x-=2.625/d1)*x+.984375; }
+  function clamp01(x){ return Math.max(0,Math.min(1,x)); }
+
+  var start = performance.now(), last = start, locked = false, lockFlash = 0;
+  var running = true;
+  document.addEventListener("visibilitychange", function(){ running = !document.hidden; if(running){ last = performance.now(); requestAnimationFrame(tick); } });
+
+  function applyGroup(g, v, extraY){
+    g.visible = v > .01;
+    var sc = layout.s * (.55 + .45*v);
+    g.scale.setScalar(sc * (layout.mobile && g!==logo ? 1.1 : 1));
+    g.position.x = layout.x;
+    g.position.y = layout.y + (1-v)*-3.2 + (extraY||0);
+  }
+
+  function tick(now){
+    if(!running) return;
+    var dt = Math.min(.05,(now-last)/1000); last = now;
+    var t = (now-start)/1000;
+    var k = reduce ? 1 : 1-Math.pow(.0015, dt);
+    Object.keys(vis).forEach(function(n){ vis[n] += (target[n]-vis[n])*k; });
+
+    // Intro: capsule spins in, text appears, pin drops and locks
+    var a = reduce ? 1 : clamp01((t-.2)/1.4);
+    capsuleG.rotation.y = (1-easeOutBack(a))*-Math.PI*.9;
+    capsuleG.scale.setScalar(.6+.4*easeOutBack(a));
+    txtMat.opacity = reduce ? 1 : clamp01((t-1.0)/.6);
+    var p = reduce ? 1 : clamp01((t-1.25)/1.0);
+    pinG.position.set(pinHome.x, pinHome.y + (1-easeOutBounce(p))*6.5, pinHome.z);
+    pinG.rotation.z = (1-p)*.6;
+    if(p>=1 && !locked){ locked = true; lockFlash = 1; }
+    lockFlash *= Math.pow(.02, dt);
+    rim.intensity = 1.4 + lockFlash*5;
+    pinG.scale.setScalar(1 + lockFlash*.18);
+
+    // idle motion
+    var idle = reduce ? 0 : 1;
+    logo.rotation.y = (mouse.x*.28 + Math.sin(t*.5)*.08)*idle;
+    logo.rotation.x = (mouse.y*.16 + Math.sin(t*.7)*.04)*idle;
+    var scrollF = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
+
+    propList.forEach(function(m){
+      var u = m.userData; var an = u.ang + t*u.spd*idle;
+      m.position.set(Math.cos(an)*u.rad, u.y + Math.sin(t*.8+u.ang)*.25*idle, Math.sin(an)*u.rad*.55 - .5);
+      m.rotation.x += u.rot.x*idle; m.rotation.y += u.rot.y*idle;
+      m.visible = t > 1.6 || reduce;
+    });
+
+    // shelf: boxes rise in when shelf scene shows, low-stock boxes pulse
+    shelf.rotation.y = (-.32 + mouse.x*.15)*1 + Math.sin(t*.3)*.05*idle;
+    shelf.rotation.x = .08 + mouse.y*.06;
+    boxes.forEach(function(bx){
+      var d = clamp01(vis.shelf*1.6 - bx.userData.delay*2);
+      bx.position.y = bx.userData.baseY + (1-d)*1.2;
+      if(bx.userData.low){ bx.material.emissiveIntensity = .6 + Math.sin(t*4)*.5*idle; }
+    });
+    camG.rotation.y = Math.sin(t*.8)*.35*idle;
+    led.visible = Math.sin(t*6) > 0 || reduce;
+
+    // network
+    net.rotation.y = t*.15*idle + mouse.x*.3;
+    net.rotation.x = mouse.y*.2 + .15;
+    ring.rotation.x = Math.PI/2 + Math.sin(t)*.2*idle; ring.rotation.y = t*.6*idle;
+    hub.scale.setScalar(1 + Math.sin(t*2.4)*.05*idle);
+    pulses.forEach(function(pu){
+      pu.userData.t = (pu.userData.t + dt*.45*idle) % 1;
+      var f = pu.userData.inward ? 1-pu.userData.t : pu.userData.t;
+      pu.position.copy(pu.userData.to).multiplyScalar(f);
+    });
+
+    applyGroup(logo, vis.logo, layout.mobile ? 0 : -scrollF*0);
+    applyGroup(shelf, vis.shelf, 0);
+    applyGroup(net, vis.net, 0);
+    if(layout.mobile){ renderer.domElement.style.opacity = (current==="logo" && window.scrollY < window.innerHeight*.6) ? "1" : ".35"; }
+    else { renderer.domElement.style.opacity = "1"; }
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
